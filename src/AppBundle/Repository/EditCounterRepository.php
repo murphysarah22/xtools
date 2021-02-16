@@ -166,6 +166,7 @@ class EditCounterRepository extends UserRightsRepository
     /**
      * Get counts of files moved, and files moved/uploaded on Commons.
      * Local file uploads are counted in getLogCounts() since we're querying the same rows anyway.
+     * @fixme X-WIKI QUERY
      * @param Project $project
      * @param User $user
      * @return array
