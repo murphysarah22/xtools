@@ -273,4 +273,16 @@ class GlobalContribsRepository extends Repository
         // Cache and return.
         return $this->setCache($cacheKey, $revisions);
     }
+
+    /**
+     * Execute the given queries as if they were UNION-ed. Designed to be ran on as few slices as possible.
+     * @param array $queries Database names as keys, SQL query as value.
+     * @param array $params Named parameters.
+     */
+    private function executeUnionedQuery(array $queries, array $params = []): void
+    {
+        $dbList = $this->getDbList();
+
+
+    }
 }
