@@ -325,22 +325,31 @@ abstract class Repository
 
     /**
      * Creates WHERE conditions with date range to be put in query.
-     * @param false|int $start
-     * @param false|int $end
+     * @param false|int $start Unix timestamp.
+     * @param false|int $end Unix timestamp.
+     * @param false|int $offset Unix timestamp. Used for pagination, will end up replacing $end.
      * @param string $tableAlias Alias of table FOLLOWED BY DOT.
      * @param string $field
      * @return string
      */
-    public function getDateConditions($start, $end, $tableAlias = '', $field = 'rev_timestamp'): string
+    public function getDateConditions($start, $end, $offset = false, $tableAlias = '', $field = 'rev_timestamp'): string
     {
         $datesConditions = '';
+
+        if (false != $offset) {
+            $offset = date('YmdHis', $offset);
+        }
         if (false != $start) {
-            // Convert to YYYYMMDDHHMMSS. *who in the world thought of having time in BLOB of this format ;-;*
+            // Convert to YYYYMMDDHHMMSS.
             $start = date('Ymd', $start).'000000';
             $datesConditions .= " AND {$tableAlias}{$field} >= '$start'";
         }
-        if (false != $end) {
-            $end = date('Ymd', $end).'235959';
+        if (false != $end || $offset) {
+            if (false != $end) {
+                $end = date('Ymd', $end).'235959';
+            } else {
+                $end = $offset;
+            }
             $datesConditions .= " AND {$tableAlias}{$field} <= '$end'";
         }
 

@@ -190,20 +190,20 @@ class GlobalContribsRepository extends Repository
      * @param string[] $dbNames Database names of projects to iterate over.
      * @param User $user The user.
      * @param int|string $namespace Namespace ID or 'all' for all namespaces.
-     * @param string $start Start date in a format accepted by strtotime().
-     * @param string $end Start date in a format accepted by strtotime().
+     * @param int|false $start Unix timestamp or false.
+     * @param int|false $end Unix timestamp or false.
      * @param int $limit The maximum number of revisions to fetch from each project.
-     * @param int $offset Offset results by this number of rows.
+     * @param int|false $offset Unix timestamp. Used for pagination.
      * @return array
      */
     public function getRevisions(
         array $dbNames,
         User $user,
         $namespace = 'all',
-        $start = '',
-        $end = '',
+        $start = false,
+        $end = false,
         int $limit = 30,
-        $offset = 0
+        $offset = false
     ): array {
         // Check cache.
         $cacheKey = $this->getCacheKey(func_get_args(), 'gc_revisions');
@@ -222,7 +222,7 @@ class GlobalContribsRepository extends Repository
         $namespaceCond = 'all' === $namespace
             ? ''
             : 'AND page_namespace = '.(int)$namespace;
-        $revDateConditions = $this->getDateConditions($start, $end, 'revs.');
+        $revDateConditions = $this->getDateConditions($start, $end, $offset, 'revs.');
 
         // Assemble queries.
         $queriesBySlice = [];
@@ -266,8 +266,20 @@ class GlobalContribsRepository extends Repository
             if (is_numeric($offset)) {
                 $sql .= " OFFSET $offset";
             }
-
             $revisions = array_merge($revisions, $this->executeProjectsQuery($slice, $sql)->fetchAll());
+        }
+
+        // If there are more than $limit results, re-sort by timestamp.
+        if (count($revisions) > $limit) {
+            usort($revisions, function ($a, $b) {
+                if ($a['unix_timestamp'] === $b['unix_timestamp']) {
+                    return 0;
+                }
+                return $a['unix_timestamp'] > $b['unix_timestamp'] ? -1 : 1;
+            });
+
+            // Truncate size to $limit.
+            $revisions = array_slice($revisions, 0, $limit);
         }
 
         // Cache and return.

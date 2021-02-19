@@ -82,8 +82,8 @@ abstract class XtoolsController extends Controller
     /** @var int|string|null Namespace parsed from the Request, ID as int or 'all' for all namespaces. */
     protected $namespace;
 
-    /** @var int Pagination offset parsed from the Request. */
-    protected $offset = 0;
+    /** @var int|false Pagination offset. UTC timestamp that can act as a substitute for $end. */
+    protected $offset;
 
     /** @var int Number of results to return. */
     protected $limit;
@@ -287,11 +287,14 @@ abstract class XtoolsController extends Controller
     {
         $this->namespace = $this->params['namespace'] ?? null;
 
-        // Offset and limit need to be ints.
-        foreach (['offset', 'limit'] as $param) {
-            if (isset($this->params[$param])) {
-                $this->{$param} = (int)$this->params[$param];
-            }
+        // Offset is given as a string timestamp that is store as a UNIX timestamp (or false).
+        if (is_string($this->params['offset'])) {
+            $this->offset = strtotime($this->params['offset']);
+        }
+
+        // Limit need to be an int.
+        if (isset($this->params['limit'])) {
+            $this->limit = (int)$this->params['limit'];
         }
 
         if (isset($this->params['project'])) {

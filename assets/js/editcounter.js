@@ -131,23 +131,6 @@ function toggleNamespace(newData, key)
 }
 
 /**
- * Load recent global edits' HTML via AJAX, to not slow down the initial page load.
- * Only load if container is present, which is missing in subroutes, e.g. ec-namespacetotals, etc.
- */
-function loadLatestGlobal()
-{
-    // Load the contributions browser, or set up the listeners if it is already present.
-    const initFunc = $('.contributions-table').length ? 'setupContributionsNavListeners' : 'loadContributions';
-
-    xtools.application[initFunc](
-        function (params) {
-            return params.target + '-contributions/' + params.project + '/' + params.username;
-        },
-        'latest-global-edits'
-    );
-}
-
-/**
  * Build the labels for the y-axis of the year/monthcount charts, which include the year/month and the total number of
  * edits across all namespaces in that year/month.
  * @param {String} id ID prefix of the chart, either 'month' or 'year'.

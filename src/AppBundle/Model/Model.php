@@ -35,17 +35,17 @@ abstract class Model
     /** @var int|string Which namespace we are querying for. 'all' for all namespaces. */
     protected $namespace;
 
-    /** @var false|int|string Start of time period as UTC timestamp, or YYYY-MM-DD format. */
+    /** @var false|int Start of time period as Unix timestamp. */
     protected $start;
 
-    /** @var false|int|string End of time period as UTC timestamp, or YYYY-MM-DD format. */
+    /** @var false|int End of time period as Unix timestamp. */
     protected $end;
+
+    /** @var false|int Unix timestamp to offset results which acts as a substitute for $end */
+    protected $offset;
 
     /** @var int Number of rows to fetch. */
     protected $limit;
-
-    /** @var int Number of rows to OFFSET, used for pagination. */
-    protected $offset;
 
     /**
      * Set this model's data repository.
@@ -143,11 +143,11 @@ abstract class Model
     }
 
     /**
-     * Get the number of rows to OFFSET, used for pagination.
-     * @return int
+     * Get the offset timestamp as Unix timestamp. Used for pagination.
+     * @return false|int
      */
-    public function getOffset(): int
+    public function getOffset()
     {
-        return (int)$this->offset;
+        return $this->offset;
     }
 }
